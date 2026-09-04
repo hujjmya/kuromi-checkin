@@ -81,7 +81,8 @@ function saveSessionMeta() {
       familyId: Cloud.familyId,
       childId: Cloud.childId,
       account: Cloud.account,
-      lastRemoteUpdatedAt: Cloud.lastRemoteUpdatedAt
+      lastRemoteUpdatedAt: Cloud.lastRemoteUpdatedAt,
+      inviteCode: Cloud.inviteCode || null
     }));
   } catch (e) { /* ignore */ }
 }
@@ -95,6 +96,7 @@ function loadSessionMeta() {
     Cloud.childId = data.childId || null;
     Cloud.account = data.account || null;
     Cloud.lastRemoteUpdatedAt = data.lastRemoteUpdatedAt || null;
+    Cloud.inviteCode = data.inviteCode || null;
   } catch (e) { /* ignore */ }
 }
 
@@ -168,10 +170,48 @@ async function ensureFamilyBootstrap(displayName) {
   Cloud.familyId = data.family_id;
   Cloud.childId = data.child_id;
   saveSessionMeta();
+  await refreshInviteCode();
   return { ok: true, created: !!data.created };
 }
 
-async function cloudRegister(account, password) {
+async function refreshInviteCode() {
+  if (!Cloud.client || !Cloud.session) return null;
+  const { data, error } = await Cloud.client.rpc('ensure_family_invite_code');
+  if (error) {
+    console.warn('ensure_family_invite_code', error);
+    Cloud.inviteCode = null;
+    return null;
+  }
+  Cloud.inviteCode = data;
+  saveSessionMeta();
+  return data;
+}
+
+async function joinFamilyByInvite(code) {
+  if (!Cloud.client || !Cloud.session) return { ok: false, reason: 'no_session' };
+  const { data, error } = await Cloud.client.rpc('join_family_by_invite', {
+    p_code: String(code || '').trim()
+  });
+  if (error) {
+    console.error('join_family_by_invite', error);
+    return { ok: false, reason: mapInviteError(error) };
+  }
+  Cloud.familyId = data.family_id;
+  Cloud.childId = data.child_id;
+  Cloud.inviteCode = String(code || '').trim().toUpperCase();
+  saveSessionMeta();
+  return { ok: true };
+}
+
+function mapInviteError(error) {
+  const msg = (error && error.message) || '';
+  if (/not found/i.test(msg)) return '邀请码无效，请向已有家长核对';
+  if (/another family/i.test(msg)) return '当前账号已在其他家庭，请换一个新账号注册加入';
+  if (/invalid invite/i.test(msg)) return '请输入正确的邀请码';
+  return msg || '加入家庭失败';
+}
+
+async function cloudRegister(account, password, inviteCode) {
   const aErr = validateAccount(account);
   if (aErr) return { ok: false, message: aErr };
   const pErr = validatePassword(password);
@@ -188,10 +228,19 @@ async function cloudRegister(account, password) {
   if (error) return { ok: false, message: mapAuthError(error) };
   Cloud.session = data.session;
   if (!Cloud.session) {
-    // 若仍要求确认邮箱，会没有 session
     return { ok: false, message: '注册成功但未登录。请在 Supabase 关闭 Confirm email 后重试登录。' };
   }
   Cloud.account = String(account).trim().toLowerCase();
+
+  const code = String(inviteCode || '').trim();
+  if (code) {
+    const joined = await joinFamilyByInvite(code);
+    if (!joined.ok) return { ok: false, message: joined.reason || '加入家庭失败' };
+    await subscribeChildState();
+    setSyncStatus('synced');
+    return { ok: true, joined: true };
+  }
+
   const boot = await ensureFamilyBootstrap(Cloud.account);
   if (!boot.ok) return { ok: false, message: '创建家庭失败：' + (boot.reason || '') };
   await seedCloudStateIfEmpty();

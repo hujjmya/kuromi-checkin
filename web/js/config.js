@@ -55,7 +55,7 @@ const COSTUMES = [
 ];
 
 /* 分享链接（已发布到线上，可在平板直接打开） */
-const SHARE_URL = 'https://a77268ee6337bd045.app.workbuddy.link';
+const SHARE_URL = 'https://hujjmya.github.io/kuromi-checkin/';
 
 /* ---------- 默认数据 ---------- */
 function defaultState() {

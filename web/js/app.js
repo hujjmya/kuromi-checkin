@@ -762,7 +762,23 @@ function bindEvents() {
       return;
     }
     if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => pop('链接已复制，去平板打开吧 🔗'), () => {});
-    window.prompt('复制下面的链接，在平板上打开：', url);
+    window.prompt('复制下面的链接，在平板或手机上打开：', url);
+  };
+
+  $('#inviteBtn').onclick = async () => {
+    if (!isLoggedIn()) { pop('请先登录'); return; }
+    const code = Cloud.inviteCode || await refreshInviteCode();
+    if (!code) {
+      pop('获取邀请码失败。请先在 Supabase 执行 docs/supabase-invite-migration.sql');
+      return;
+    }
+    const text = `家庭邀请码：${code}\n其他家长注册时填写此码即可加入同一家庭。\n网页：${SHARE_URL}`;
+    if (typeof AndroidApp !== 'undefined' && AndroidApp.shareText) {
+      AndroidApp.shareText(text);
+      return;
+    }
+    if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => pop(`邀请码已复制：${code}`), () => {});
+    window.prompt('把邀请码发给其他家长（注册时填写）：', code);
   };
 
   // 重置
@@ -822,6 +838,7 @@ async function init() {
   const cloud = await initCloud();
   if (cloudConfigured() && isLoggedIn()) {
     showAuthGate(false);
+    await refreshInviteCode();
     await loadFromCloudOrDefault();
     Cloud._appliedAt = Cloud.lastRemoteUpdatedAt;
     updateAccountChip();

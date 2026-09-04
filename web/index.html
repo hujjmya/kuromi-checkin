@@ -35,6 +35,8 @@
         <input id="registerPassword" class="auth-input" type="password" maxlength="72" autocomplete="new-password" placeholder="至少 6 位" />
         <label class="auth-label">确认密码</label>
         <input id="registerPassword2" class="auth-input" type="password" maxlength="72" autocomplete="new-password" placeholder="再输入一次" />
+        <label class="auth-label">家庭邀请码（可选）</label>
+        <input id="registerInvite" class="auth-input" maxlength="16" autocomplete="off" placeholder="加入已有家庭时填写，新建家庭请留空" />
         <button type="button" class="add-btn full" id="registerSubmit">注册家庭账号</button>
       </div>
       <p class="auth-message" id="authMessage"></p>
@@ -166,9 +168,10 @@
   <footer class="footer">
     <span>💜 用爱与耐心，陪小可爱长大 · 登录后数据云端同步，也可手动备份</span>
     <div class="footer-btns">
+      <button class="reset-btn" id="inviteBtn" title="查看家庭邀请码，给其他家长加入">👨‍👩‍👧 邀请码</button>
       <button class="reset-btn" id="backupBtn" title="下载数据备份文件，换个设备也不丢">💾 备份</button>
       <button class="reset-btn" id="restoreBtn" title="从备份文件恢复数据">📂 恢复</button>
-      <button class="reset-btn" id="shareBtn" title="复制可在平板上打开的分享链接">🔗 平板链接</button>
+      <button class="reset-btn" id="shareBtn" title="复制可在平板上打开的分享链接">🔗 网页链接</button>
       <button class="reset-btn" id="resetBtn" title="清空所有打卡数据">🗑 重置全部</button>
       <input type="file" id="restoreInput" accept="application/json,.json" hidden />
     </div>

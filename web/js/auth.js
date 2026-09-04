@@ -51,6 +51,7 @@ async function handleAuthSubmit(mode) {
   const account = (mode === 'login' ? $('#loginAccount') : $('#registerAccount')).value.trim();
   const password = (mode === 'login' ? $('#loginPassword') : $('#registerPassword')).value;
   const password2 = mode === 'register' ? $('#registerPassword2').value : '';
+  const inviteCode = mode === 'register' ? (($('#registerInvite') && $('#registerInvite').value) || '') : '';
   if (mode === 'register' && password !== password2) {
     setAuthMessage('两次输入的密码不一致', true);
     return;
@@ -62,7 +63,7 @@ async function handleAuthSubmit(mode) {
   try {
     const result = mode === 'login'
       ? await cloudLogin(account, password)
-      : await cloudRegister(account, password);
+      : await cloudRegister(account, password, inviteCode);
     if (!result.ok) {
       setAuthMessage(result.message || '失败', true);
       return;
@@ -72,7 +73,9 @@ async function handleAuthSubmit(mode) {
     showAuthGate(false);
     updateAccountChip();
     renderAll();
-    pop(mode === 'login' ? '登录成功，数据已同步 ☁️' : '注册成功，家庭已创建 💜');
+    if (mode === 'login') pop('登录成功，数据已同步 ☁️');
+    else if (result.joined) pop('已加入家庭，数据已同步 💜');
+    else pop('注册成功，家庭已创建 💜');
   } catch (e) {
     setAuthMessage(String(e.message || e), true);
   } finally {

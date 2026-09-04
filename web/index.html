@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#4a2f73" />
+  <title>🌙 库洛米每日打卡工作台</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="sky" id="sky"></div>
+
+  <!-- 登录门禁 -->
+  <div class="auth-gate" id="authGate" hidden>
+    <div class="auth-card">
+      <div class="auth-logo" id="authLogo"></div>
+      <h1 class="auth-title">库洛米打卡</h1>
+      <p class="auth-sub">家长账号登录后，平板与网页数据自动同步</p>
+      <div class="auth-config-hint" id="authConfigHint" hidden></div>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-mode="login">登录</button>
+        <button type="button" class="auth-tab" data-mode="register">注册</button>
+      </div>
+      <div id="authLoginPanel">
+        <label class="auth-label">账号</label>
+        <input id="loginAccount" class="auth-input" maxlength="32" autocomplete="username" placeholder="字母数字下划线，3–32 位" />
+        <label class="auth-label">密码</label>
+        <input id="loginPassword" class="auth-input" type="password" maxlength="72" autocomplete="current-password" placeholder="至少 6 位" />
+        <button type="button" class="add-btn full" id="loginSubmit">登录并同步</button>
+      </div>
+      <div id="authRegisterPanel" hidden>
+        <label class="auth-label">账号</label>
+        <input id="registerAccount" class="auth-input" maxlength="32" autocomplete="username" placeholder="字母数字下划线，3–32 位" />
+        <label class="auth-label">密码</label>
+        <input id="registerPassword" class="auth-input" type="password" maxlength="72" autocomplete="new-password" placeholder="至少 6 位" />
+        <label class="auth-label">确认密码</label>
+        <input id="registerPassword2" class="auth-input" type="password" maxlength="72" autocomplete="new-password" placeholder="再输入一次" />
+        <button type="button" class="add-btn full" id="registerSubmit">注册家庭账号</button>
+      </div>
+      <p class="auth-message" id="authMessage"></p>
+      <p class="auth-note">无需邮箱验证 · 必须联网使用 · 孩子无需单独注册</p>
+    </div>
+  </div>
+
+  <div id="appRoot">
+  <div class="storage-banner" id="storageBanner" hidden>
+    ⚠️ 当前打开方式无法自动保存数据，请点底部「💾 备份」存一份，下次用「📂 恢复」导入，这样第二天也不会丢～
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-badge" id="logoPet"></div>
+      <div class="title-wrap">
+        <h1>库洛米每日打卡工作台</h1>
+        <p class="subtitle">二年级小可爱 · 每天进步一点点 💜</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="sync-chip" id="syncChip" title="云同步状态">☁️ 云同步</div>
+      <button class="tool-btn account-chip" id="accountChip" hidden title="退出登录">👤</button>
+      <button class="tool-btn" id="reportBtn" title="查看/打印家长周报">📊 家长周报</button>
+      <button class="tool-btn" id="sheetBtn" title="打印可保存的 PDF 打卡表">🖨 打卡表</button>
+      <div class="date-chip" id="dateChip">📅 今天</div>
+      <div class="points-chip" title="我的总积分">⭐ <span id="totalPoints">0</span> 分</div>
+    </div>
+  </header>
+
+  <main class="board">
+    <!-- 宠物区 -->
+    <section class="card pet-card" id="petCard">
+      <h2 class="card-title">🐾 我的小宠物</h2>
+      <div class="pet-stage">
+        <div class="pet-display" id="petDisplay"></div>
+        <div class="pet-mood-bubble" id="petMoodBubble">今天也要加油哦～</div>
+      </div>
+      <div class="pet-level">
+        <span>成长值</span>
+        <div class="level-bar"><div class="level-fill" id="levelFill"></div></div>
+        <span id="petLevelText">Lv.1 蛋仔</span>
+      </div>
+
+      <div class="wardrobe">
+        <h3 class="sub-title">👗 宠物换装</h3>
+        <div class="costume-row" id="costumeRow"></div>
+        <div class="costume-hint" id="costumeHint"></div>
+      </div>
+
+      <div class="pet-pick">
+        <span class="pet-only">🐱 我的布偶猫</span>
+      </div>
+      <div class="pet-name-row">
+        <input id="petNameInput" class="pet-name-input" maxlength="8" placeholder="给宠物起个名" />
+        <button class="mini-btn" id="savePetName">改名</button>
+      </div>
+    </section>
+
+    <!-- 每日计划 -->
+    <section class="card plan-card" id="planCard">
+      <div class="plan-head">
+        <h2 class="card-title">📝 每日计划</h2>
+        <div class="tmpl-toggle" id="tmplToggle">
+          <button class="tmpl-btn" data-mode="school">🏫 上学日</button>
+          <button class="tmpl-btn" data-mode="weekend">🌈 周末</button>
+        </div>
+      </div>
+      <p class="card-hint">完成一项 +5 分，勾一勾吧！（清单会按上学日 / 周末自动切换）</p>
+      <ul class="plan-list" id="planList"></ul>
+      <div class="add-row">
+        <input id="planInput" class="add-input" maxlength="20" placeholder="添加今天的任务…" />
+        <button class="add-btn" id="addPlanBtn">＋ 添加</button>
+      </div>
+      <div class="plan-progress">
+        <span id="planDoneCount">0/0 完成</span>
+        <span id="planTodayPts" class="pts-tag">今日 +0</span>
+      </div>
+    </section>
+
+    <!-- 运动打卡 -->
+    <section class="card sport-card" id="sportCard">
+      <h2 class="card-title">⚽ 运动打卡</h2>
+      <p class="card-hint">选个项目，每天点一下就打卡～</p>
+      <div class="sport-pick" id="sportPick"></div>
+      <div class="week-grid" id="weekGrid"></div>
+      <div class="sport-stat">
+        <span>🔥 本周打卡 <b id="sportWeekCount">0</b> 天</span>
+        <span>🏆 连续 <b id="sportStreak">0</b> 天</span>
+      </div>
+    </section>
+
+    <!-- 读书笔记 -->
+    <section class="card book-card" id="bookCard">
+      <h2 class="card-title">📚 读书笔记</h2>
+      <p class="card-hint">读完一本书，记下来 +5 分！</p>
+      <div class="book-form">
+        <input id="bookName" class="add-input" maxlength="30" placeholder="书名" />
+        <input id="bookPages" class="add-input pages" maxlength="6" placeholder="页数" inputmode="numeric" />
+        <textarea id="bookNote" class="book-note" maxlength="120" placeholder="我的读书心得…（喜欢的角色 / 学到了什么）"></textarea>
+        <button class="add-btn full" id="addBookBtn">📖 记录这本书</button>
+      </div>
+      <ul class="book-list" id="bookList"></ul>
+    </section>
+
+    <!-- 心情日记 -->
+    <section class="card mood-card" id="moodCard">
+      <h2 class="card-title">💗 心情日记</h2>
+      <p class="card-hint">今天心情怎么样？选一个吧～</p>
+      <div class="mood-pick" id="moodPick"></div>
+      <textarea id="moodText" class="mood-text" maxlength="100" placeholder="想对库洛米说的话…"></textarea>
+      <button class="add-btn full" id="saveMoodBtn">💌 保存今日心情 (+3)</button>
+      <div class="mood-today" id="moodToday"></div>
+    </section>
+
+    <!-- 积分奖励 -->
+    <section class="card reward-card" id="rewardCard">
+      <h2 class="card-title">🎁 积分奖励</h2>
+      <div class="reward-bank">
+        <div class="bank-num" id="rewardPoints">0</div>
+        <div class="bank-label">我的可用积分</div>
+      </div>
+      <ul class="reward-list" id="rewardList"></ul>
+      <h3 class="sub-title">🧾 兑换记录</h3>
+      <ul class="redeem-list" id="redeemList"></ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>💜 用爱与耐心，陪小可爱长大 · 登录后数据云端同步，也可手动备份</span>
+    <div class="footer-btns">
+      <button class="reset-btn" id="backupBtn" title="下载数据备份文件，换个设备也不丢">💾 备份</button>
+      <button class="reset-btn" id="restoreBtn" title="从备份文件恢复数据">📂 恢复</button>
+      <button class="reset-btn" id="shareBtn" title="复制可在平板上打开的分享链接">🔗 平板链接</button>
+      <button class="reset-btn" id="resetBtn" title="清空所有打卡数据">🗑 重置全部</button>
+      <input type="file" id="restoreInput" accept="application/json,.json" hidden />
+    </div>
+  </footer>
+
+  <!-- 家长周报弹窗 -->
+  <div class="modal" id="reportModal">
+    <div class="modal-box">
+      <button class="modal-close no-print" data-close="reportModal">✕</button>
+      <div id="reportBody"></div>
+      <div class="modal-actions no-print">
+        <button class="add-btn" id="reportPrintBtn">🖨 打印 / 存为 PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 可打印打卡表弹窗 -->
+  <div class="modal" id="sheetModal">
+    <div class="modal-box">
+      <button class="modal-close no-print" data-close="sheetModal">✕</button>
+      <div id="sheetBody"></div>
+      <div class="modal-actions no-print">
+        <button class="add-btn" id="sheetPrintBtn">🖨 打印 / 存为 PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+  </div><!-- /appRoot -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="js/env.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

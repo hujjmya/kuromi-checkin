@@ -1,0 +1,10 @@
+.gradle/
+.idea/
+local.properties
+**/build/
+*.iml
+*.jks
+*.keystore
+
+# Android assets are generated from ../web by syncWebAssets
+android/app/src/main/assets/

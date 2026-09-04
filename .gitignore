@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Android (see android/.gitignore)
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/src/main/assets/
+
+# Release binaries (attach via GitHub Releases instead)
+android/release/*.apk
+android/release/*.idsig
+
+# Archives
+docs/archive/
+
+# 不要提交 secret key。Publishable key（sb_publishable_）可写入 env.js 以便 Pages 部署。
+# 若仓库公开且仍担心，可改回忽略 env.js，改为在 GitHub 网页里手动上传该文件。
+# web/js/env.js

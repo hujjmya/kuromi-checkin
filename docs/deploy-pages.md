@@ -1,51 +1,40 @@
 # 部署到 GitHub Pages
 
-## 一次部署（推荐）
+仓库：https://github.com/hujjmya/kuromi-checkin  
 
-1. 在 GitHub 新建仓库（可私有），例如 `kuromi-checkin`
-2. 本机推送：
+线上地址：https://hujjmya.github.io/kuromi-checkin/
 
-```bash
-cd "/Users/admin/Desktop/SourceCode/打卡软件"
-git remote add origin https://github.com/你的用户名/kuromi-checkin.git
-git push -u origin main
-```
+## 怎么工作的
 
-3. 打开仓库 → **Settings → Pages**
-   - Source：**Deploy from a branch**
-   - Branch：`main`
-   - Folder：**`/web`**
-   - Save
+- 源码在仓库的 `web/` 目录
+- 推送到 `main` 后，GitHub Actions 自动把 `web/` 发布到 Pages
+- 也可在 Actions 页手动 Run workflow：`Deploy web to GitHub Pages`
 
-4. 几分钟后访问：
+## 以后改代码怎么更新线上
 
-`https://你的用户名.github.io/kuromi-checkin/`
-
-5. 在 Supabase → **Authentication → URL Configuration**：
-   - **Site URL** 填上面的 Pages 地址
-   - **Redirect URLs** 加上同一地址（可加 `/**`）
-
-## 以后改文件怎么更新
-
-只改网页时，替换 `web/` 里对应文件即可，例如：
-
-- `web/js/app.js`
-- `web/js/cloud.js`
-- `web/css/style.css`
-- `web/index.html`
-
-然后：
+1. 改本地 `web/` 里对应文件（如 `web/js/app.js`）
+2. 提交并推送：
 
 ```bash
 cd "/Users/admin/Desktop/SourceCode/打卡软件"
 git add web/
-git commit -m "更新网页"
+git commit -m "更新说明"
 git push
 ```
 
-几分钟后 Pages 会自动更新。也可在 GitHub 网页上直接编辑/上传文件。
+3. 等 1–2 分钟，刷新线上网址即可
 
-## 注意
+也可在 GitHub 网页上直接编辑 `web/` 下的文件并 Commit。
 
-- `web/js/env.js` 已包含 Publishable key，Pages 才能登录；不要把 **Secret key** 放进仓库
-- 平板 APK 不走 Pages，仍需本地/Android 打包；打包前执行 `./scripts/sync-web.sh`
+## Supabase 必改
+
+Authentication → URL Configuration：
+
+- **Site URL**：`https://hujjmya.github.io/kuromi-checkin/`
+- **Redirect URLs**：加上同一地址
+
+## 说明
+
+- 仓库已设为 **Public**（免费账号才能开 Pages）
+- 打卡数据仍在 Supabase，需登录才能看
+- `web/js/env.js` 里是 Publishable key，可放在前端；不要放 Secret key
